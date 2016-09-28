@@ -15,7 +15,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header(
     'Access-Control-Allow-Headers',
-    req.headers['Access-Control-Request-Headers']
+    req.headers['access-control-request-headers']
   );
   next();
 });
@@ -31,8 +31,13 @@ function handleApi(req, res) {
   const headers = _.omit(req.headers, IGNORE_HEADERS);
   fetch(path, {method: req.method, headers: headers})
     .then(x => x.json())
-    .then(json => res.status(200).send(json))
-    .catch(err => res.status(500).send(err))
+    .then(json => {
+      res.status(200).send(json)
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).send(err.message);
+    })
   ;
 }
 
