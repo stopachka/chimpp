@@ -21,23 +21,22 @@ app.use((req, res, next) => {
 });
 
 const IGNORE_HEADERS = [
-  'host', 'user-agent', 'connection', 'content-length', 'user-agent', 'origin',
-  'accept', 'referer', 'accept-encoding', 'accept-language'
+  'host', 'user-agent', 'connection', 'content-length', 'origin', 'accept',
+  'referer', 'accept-encoding', 'accept-language'
 ];
 
-['get', 'put', 'post', 'delete'].forEach(k => app[k](
-  '/api/*',
-  (req, res) => {
-    const query = querystring.stringify(req.query);
-    const path = req.params['0'] + (query ? '?' + query : '');
-    const headers = _.omit(req.headers, IGNORE_HEADERS);
-    fetch(path, {method: req.method, headers: headers})
-      .then(x => x.json())
-      .then(json => res.status(200).send(json))
-      .catch(err => res.status(500).send(err))
-    ;
-  }
-));
+function handleApi(req, res) {
+  const query = querystring.stringify(req.query);
+  const path = req.params['0'] + (query ? '?' + query : '');
+  const headers = _.omit(req.headers, IGNORE_HEADERS);
+  fetch(path, {method: req.method, headers: headers})
+    .then(x => x.json())
+    .then(json => res.status(200).send(json))
+    .catch(err => res.status(500).send(err))
+  ;
+}
+
+['get', 'put', 'post', 'delete'].forEach(k => app[k]('/api/*', handleApi));
 
 app.get('/', (req, res) => {
   res.status(200)
